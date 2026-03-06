@@ -2,127 +2,191 @@
 const channelList = document.getElementById("channel-list");
 const videoPlayer = document.getElementById("video-player");
 const searchInput = document.getElementById("search-input");
+const sectionButtons = document.querySelectorAll(".section-btn");
+const darkModeBtn = document.getElementById("dark-mode-toggle");
 
 let allChannels = [];
+let currentSection = "all";
 
-// تشغيل القناة
-function playChannel(url) {
-    videoPlayer.src = url;
-    videoPlayer.play();
-}
-
-// تحميل القنوات من ملف M3U
-async function loadChannels() {
-
-    const response = await fetch("https://iptv-org.github.io/iptv/index.m3u");
-    const text = await response.text();
-
-    const lines = text.split("\n");
-
-    let name = "";
-    let group = "";
-
-    allChannels = [];
-
-    lines.forEach(line => {
-
-        if (line.startsWith("#EXTINF")) {
-
-            const nameMatch = line.split(",");
-
-            name = nameMatch[nameMatch.length - 1];
-
-            const groupMatch = line.match(/group-title="(.*?)"/);
-
-            group = groupMatch ? groupMatch[1] : "other";
-
-        }
-
-        if (line.startsWith("http")) {
-
-            allChannels.push({
-                name: name,
-                group: group,
-                url: line
-            });
-
-        }
-
-    });
-
-    displayChannels(allChannels);
-
-}
-
-loadChannels();
-
-
-// عرض القنوات
-function displayChannels(list) {
-
-    channelList.innerHTML = "";
-
-    list.forEach(ch => {
-
-        const li = document.createElement("li");
-
-        li.textContent = ch.name;
-
-        li.onclick = () => playChannel(ch.url);
-
-        channelList.appendChild(li);
-
-    });
-
-}
-
-
-// البحث
-searchInput.addEventListener("input", () => {
-
-    const query = searchInput.value.toLowerCase();
-
-    const filtered = allChannels.filter(ch =>
-        ch.name.toLowerCase().includes(query)
-    );
-
-    displayChannels(filtered);
-
-});
-
-
-// Dark Mode
-const darkBtn = document.getElementById("dark-mode-toggle");
-
-if (darkBtn) {
-
-    darkBtn.onclick = () => {
-        document.body.classList.toggle("dark-mode");
-    };
-
-}
-
-
-// تغيير اللغة
+// =============================
+// اللغات
+// =============================
 const languages = {
 
-    ar: {
-        search: "ابحث عن قناة..."
-    },
+ar: {
+sections: {
+all: "كل القنوات",
+sports: "رياضة",
+movies: "أفلام",
+news: "أخبار",
+kids: "أطفال",
+countries: "قنوات دولية"
+},
+search: "ابحث عن قناة",
+download: "تحميل ملف M3U"
+},
 
-    en: {
-        search: "Search channel..."
-    },
+en: {
+sections: {
+all: "All Channels",
+sports: "Sports",
+movies: "Movies",
+news: "News",
+kids: "Kids",
+countries: "Countries"
+},
+search: "Search channel",
+download: "Download M3U"
+},
 
-    fr: {
-        search: "Rechercher une chaîne..."
-    }
+fr: {
+sections: {
+all: "Toutes les chaînes",
+sports: "Sports",
+movies: "Films",
+news: "Actualités",
+kids: "Enfants",
+countries: "Pays"
+},
+search: "Rechercher une chaîne",
+download: "Télécharger M3U"
+}
 
 };
 
-function setLanguage(lang) {
+// =============================
+// تشغيل القناة
+// =============================
+function playChannel(url) {
 
-    searchInput.placeholder = languages[lang].search;
+videoPlayer.src = url;
+videoPlayer.play();
 
 }
 
+// =============================
+// تحميل القنوات من ملف JSON
+// =============================
+async function loadChannels() {
+
+const response = await fetch("channels/channels.json");
+
+allChannels = await response.json();
+
+displayChannels(currentSection);
+
+}
+
+// =============================
+// عرض القنوات
+// =============================
+function displayChannels(section) {
+
+channelList.innerHTML = "";
+
+let list = allChannels;
+
+if(section !== "all"){
+
+list = allChannels.filter(ch => ch.category === section);
+
+}
+
+list.forEach(ch => {
+
+const li = document.createElement("li");
+
+li.textContent = ch.name;
+
+li.onclick = () => playChannel(ch.url);
+
+channelList.appendChild(li);
+
+});
+
+}
+
+// =============================
+// تغيير القسم
+// =============================
+sectionButtons.forEach(btn => {
+
+btn.onclick = () => {
+
+currentSection = btn.dataset.section;
+
+displayChannels(currentSection);
+
+};
+
+});
+
+// =============================
+// البحث
+// =============================
+searchInput.addEventListener("input", () => {
+
+const query = searchInput.value.toLowerCase();
+
+const filtered = allChannels.filter(ch =>
+ch.name.toLowerCase().includes(query)
+);
+
+channelList.innerHTML = "";
+
+filtered.forEach(ch => {
+
+const li = document.createElement("li");
+
+li.textContent = ch.name;
+
+li.onclick = () => playChannel(ch.url);
+
+channelList.appendChild(li);
+
+});
+
+});
+
+// =============================
+// تغيير اللغة
+// =============================
+function setLanguage(lang) {
+
+const data = languages[lang];
+
+if(!data) return;
+
+searchInput.placeholder = data.search;
+
+document.querySelectorAll(".section-btn").forEach(btn => {
+
+const sec = btn.dataset.section;
+
+if(data.sections[sec]){
+
+btn.textContent = data.sections[sec];
+
+}
+
+});
+
+}
+
+// =============================
+// Dark Mode
+// =============================
+if(darkModeBtn){
+
+darkModeBtn.onclick = () => {
+
+document.body.classList.toggle("dark-mode");
+
+};
+
+}
+
+// =============================
+// تشغيل الموقع
+// =============================
+loadChannels();
