@@ -1,164 +1,30 @@
-/* ----------------------------
-   Reset أساسي
----------------------------- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-/* ----------------------------
-   الجسم و Dark Mode
----------------------------- */
 body {
-    background-color: #f5f5f5;
-    color: #222;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    background: #0b0b0b;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
 }
 
-body.dark-mode {
-    background-color: #1a1a1a;
-    color: #eee;
+#player {
+    width: 80%;
+    max-width: 900px;
+    margin: 20px auto;
 }
 
-/* ----------------------------
-   الهيدر
----------------------------- */
-header {
-    background-color: #0077cc;
-    color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-header h1 {
-    font-size: 1.8rem;
-}
-
-header .controls button,
-header .controls select {
-    padding: 5px 10px;
-    margin-left: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-header .controls button:hover {
-    background-color: #005fa3;
-    color: #fff;
-}
-
-/* ----------------------------
-   Main و Layout
----------------------------- */
-main {
-    flex: 1;
-    display: flex;
-    padding: 20px;
-    gap: 20px;
-}
-
-/* ----------------------------
-   مشغل الفيديو
----------------------------- */
-.video-container {
-    flex: 3;
-    background-color: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-video#video-player {
-    width: 100%;
-    height: 100%;
-}
-
-/* ----------------------------
-   قائمة القنوات
----------------------------- */
-.channel-sidebar {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+#channels {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 10px;
+    padding: 20px;
 }
 
-.channel-sidebar input#search-input {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.channel-sidebar .section-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 10px;
-}
-
-.section-btn {
-    flex: 1 1 48%;
-    padding: 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #0077cc;
-    color: #fff;
+.channel {
+    background: #1c1c1c;
+    padding: 10px;
     cursor: pointer;
-    font-size: 0.9rem;
+    border-radius: 8px;
 }
 
-.section-btn:hover {
-    background-color: #005fa3;
-}
-
-ul#channel-list {
-    list-style: none;
-    overflow-y: auto;
-    max-height: calc(100vh - 180px);
-    padding-right: 5px;
-}
-
-ul#channel-list li {
-    padding: 8px;
-    border-bottom: 1px solid #ccc;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-ul#channel-list li:hover {
-    background-color: #0077cc;
-    color: #fff;
-}
-
-/* ----------------------------
-   Dark Mode adjustments
----------------------------- */
-body.dark-mode header {
-    background-color: #333;
-}
-
-body.dark-mode .section-btn {
-    background-color: #444;
-}
-
-body.dark-mode .section-btn:hover {
-    background-color: #555;
-}
-
-body.dark-mode ul#channel-list li {
-    border-bottom: 1px solid #555;
-}
-
-body.dark-mode ul#channel-list li:hover {
-    background-color: #555;
-    color: #fff;
+.channel:hover {
+    background: #333;
 }
