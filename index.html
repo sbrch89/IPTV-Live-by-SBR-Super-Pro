@@ -4,102 +4,122 @@
 <meta charset="UTF-8">
 <title>IPTV Live by SBR</title>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
+
 body{
+font-family: Arial;
 background:#111;
 color:white;
-font-family:Arial;
-text-align:center;
+margin:0;
+}
+
+.container{
+display:flex;
+height:100vh;
+}
+
+.player{
+flex:2;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
 video{
-width:80%;
-margin:20px auto;
-display:block;
+width:90%;
+max-height:80vh;
+background:black;
 }
 
-button{
-display:block;
-width:80%;
-margin:5px auto;
+.channels{
+flex:1;
+overflow-y:auto;
+background:#1c1c1c;
 padding:10px;
-background:#222;
-color:white;
-border:none;
+}
+
+.channel{
+padding:8px;
+border-bottom:1px solid #333;
 cursor:pointer;
 }
 
-button:hover{
-background:#444;
+.channel:hover{
+background:#333;
 }
+
 </style>
 </head>
 
 <body>
 
-<h1>IPTV Live by SBR</h1>
+<h2 style="text-align:center">IPTV Live by SBR</h2>
 
-<video id="player" controls autoplay></video>
+<div class="container">
 
-<div id="channels"></div>
+<div class="player">
+<video id="video" controls></video>
+</div>
+
+<div id="channels" class="channels">
+Loading channels...
+</div>
+
+</div>
 
 <script>
 
-const sources = [
+const video = document.getElementById('video')
 
-"https://iptv-org.github.io/iptv/index.m3u",
+function play(url){
 
-"https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+if(Hls.isSupported()){
 
-"https://raw.githubusercontent.com/iptv-restream/iptv-channels/master/channels.m3u"
+const hls = new Hls()
 
-];
+hls.loadSource(url)
 
-async function loadChannels(){
+hls.attachMedia(video)
 
-let container=document.getElementById("channels");
+}
 
-for(let url of sources){
+else{
 
-try{
+video.src = url
 
-let res=await fetch(url);
-let text=await res.text();
+}
 
-let lines=text.split("\n");
+}
+
+fetch("https://iptv-org.github.io/iptv/index.m3u")
+
+.then(r=>r.text())
+
+.then(data=>{
+
+let lines = data.split("\n")
+
+let html=""
 
 for(let i=0;i<lines.length;i++){
 
 if(lines[i].startsWith("#EXTINF")){
 
-let name=lines[i].split(",")[1];
-let stream=lines[i+1];
+let name = lines[i].split(",")[1]
 
-let btn=document.createElement("button");
+let url = lines[i+1]
 
-btn.innerText=name;
-
-btn.onclick=function(){
-document.getElementById("player").src=stream;
-};
-
-container.appendChild(btn);
+html += `<div class="channel" onclick="play('${url}')">${name}</div>`
 
 }
 
 }
 
-}catch(e){
+document.getElementById("channels").innerHTML = html
 
-console.log("source failed",url);
-
-}
-
-}
-
-}
-
-loadChannels();
+})
 
 </script>
 
