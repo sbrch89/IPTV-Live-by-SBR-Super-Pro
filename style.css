@@ -11,7 +11,7 @@ body {
     margin: 20px auto;
 }
 
-}
+
 #channels {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -29,5 +29,6 @@ body {
 .channel:hover {
     background: #333;
 }
+
 
 
