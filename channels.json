@@ -1,104 +1,62 @@
-// ----------------------------
-// عناصر الصفحة
-// ----------------------------
-const channelList = document.getElementById("channel-list");
-const videoPlayer = document.getElementById("video-player");
-const searchInput = document.getElementById("search-input");
-const sectionButtons = document.querySelectorAll(".section-btn");
-const languageSelect = document.getElementById("language-select");
-
-// ----------------------------
-// القناة الحالية واللغة
-// ----------------------------
-let allChannels = [];
-let currentLanguage = "ar";
-
-// ----------------------------
-// تشغيل القناة
-// ----------------------------
-function playChannel(url) {
-    videoPlayer.src = url;
-    videoPlayer.play();
-}
-
-// ----------------------------
-// تحميل القنوات من JSON
-// ----------------------------
-async function loadChannels() {
-    try {
-        const response = await fetch("channels.json");
-        const data = await response.json();
-        allChannels = data; // يحتوي على الأقسام الخمسة
-
-        // عرض القسم الأول (رياضة) عند البداية
-        displayChannels("sports");
-
-        // إضافة أحداث البحث
-        searchInput.addEventListener("input", () => {
-            const query = searchInput.value.toLowerCase();
-            const filtered = [];
-            Object.keys(allChannels).forEach(section => {
-                allChannels[section].forEach(ch => {
-                    const name = ch.name.toLowerCase();
-                    if (name.includes(query)) filtered.push(ch);
-                });
-            });
-            displayFilteredChannels(filtered);
-        });
-
-        // إضافة أحداث أزرار الأقسام
-        sectionButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                const section = btn.dataset.section;
-                displayChannels(section);
-            });
-        });
-
-    } catch (err) {
-        console.error("Error loading channels:", err);
+{
+  "sports": [
+    {
+      "name": "BBC Sports",
+      "url": "http://example.com/bbc_sports.m3u8",
+      "description": { "ar": "بي بي سي سبورت", "en": "BBC Sports", "fr": "BBC Sports" }
+    },
+    {
+      "name": "beIN Sports",
+      "url": "http://example.com/bein_sports.m3u8",
+      "description": { "ar": "بين سبورت", "en": "beIN Sports", "fr": "beIN Sports" }
     }
+  ],
+  "movies": [
+    {
+      "name": "HBO Movies",
+      "url": "http://example.com/hbo_movies.m3u8",
+      "description": { "ar": "أفلام HBO", "en": "HBO Movies", "fr": "Films HBO" }
+    },
+    {
+      "name": "Cinemax",
+      "url": "http://example.com/cinemax.m3u8",
+      "description": { "ar": "سينماكس", "en": "Cinemax", "fr": "Cinemax" }
+    }
+  ],
+  "news": [
+    {
+      "name": "BBC News",
+      "url": "http://example.com/bbc_news.m3u8",
+      "description": { "ar": "بي بي سي نيوز", "en": "BBC News", "fr": "BBC News" }
+    },
+    {
+      "name": "CNN",
+      "url": "http://example.com/cnn.m3u8",
+      "description": { "ar": "سي إن إن", "en": "CNN", "fr": "CNN" }
+    }
+  ],
+  "kids": [
+    {
+      "name": "Cartoon Network",
+      "url": "http://example.com/cartoon_network.m3u8",
+      "description": { "ar": "كارتون نتورك", "en": "Cartoon Network", "fr": "Cartoon Network" }
+    },
+    {
+      "name": "Disney Channel",
+      "url": "http://example.com/disney_channel.m3u8",
+      "description": { "ar": "ديزني", "en": "Disney Channel", "fr": "Disney Channel" }
+    }
+  ],
+  "countries": [
+    {
+      "name": "Al Jazeera",
+      "url": "http://example.com/aljazeera.m3u8",
+      "description": { "ar": "الجزيرة", "en": "Al Jazeera", "fr": "Al Jazeera" }
+    },
+    {
+      "name": "France 24",
+      "url": "http://example.com/france24.m3u8",
+      "description": { "ar": "فرانس 24", "en": "France 24", "fr": "France 24" }
+    }
+  ]
 }
-
-// ----------------------------
-// عرض القنوات حسب القسم
-// ----------------------------
-function displayChannels(section) {
-    const list = allChannels[section] || [];
-    displayFilteredChannels(list);
-}
-
-// ----------------------------
-// عرض قائمة القنوات
-// ----------------------------
-function displayFilteredChannels(list) {
-    channelList.innerHTML = "";
-    list.forEach(ch => {
-        const li = document.createElement("li");
-        li.textContent = ch.description[currentLanguage] || ch.name;
-        li.onclick = () => playChannel(ch.url);
-        channelList.appendChild(li);
-    });
-}
-
-// ----------------------------
-// تغيير اللغة
-// ----------------------------
-languageSelect.addEventListener("change", () => {
-    currentLanguage = languageSelect.value;
-    // إعادة عرض القسم الحالي
-    const activeSectionBtn = document.querySelector(".section-btn.active") || sectionButtons[0];
-    displayChannels(activeSectionBtn.dataset.section);
-});
-
-// ----------------------------
-// Dark Mode
-// ----------------------------
-const darkModeBtn = document.getElementById("dark-mode-toggle");
-if (darkModeBtn) {
-    darkModeBtn.onclick = () => document.body.classList.toggle("dark-mode");
-}
-
-// ----------------------------
-// تحميل القنوات عند فتح الموقع
-// ----------------------------
-loadChannels();
