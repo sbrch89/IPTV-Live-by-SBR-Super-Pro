@@ -1,126 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>IPTV Live by SBR</title>
-
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
-
-body{
-font-family: Arial;
-background:#111;
-color:white;
-margin:0;
-}
-
-.container{
-display:flex;
-height:100vh;
-}
-
-.player{
-flex:2;
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-video{
-width:90%;
-max-height:80vh;
-background:black;
-}
-
-.channels{
-flex:1;
-overflow-y:auto;
-background:#1c1c1c;
-padding:10px;
-}
-
-.channel{
-padding:8px;
-border-bottom:1px solid #333;
-cursor:pointer;
-}
-
-.channel:hover{
-background:#333;
-}
-
+body{margin:0;font-family:Arial;background:#111;color:white;}
+.container{display:flex;height:90vh;}
+.player{flex:2;display:flex;justify-content:center;align-items:center;}
+video{width:90%;max-height:80vh;background:black;}
+.channels{flex:1;overflow-y:auto;background:#1c1c1c;padding:10px;}
+.channel{padding:8px;border-bottom:1px solid #333;cursor:pointer;}
+.channel:hover{background:#333;}
+h2{text-align:center;margin:10px;}
 </style>
 </head>
-
 <body>
 
-<h2 style="text-align:center">IPTV Live by SBR</h2>
+<h2>IPTV Live by SBR</h2>
 
 <div class="container">
-
-<div class="player">
-<video id="video" controls></video>
-</div>
-
-<div id="channels" class="channels">
-Loading channels...
-</div>
-
+  <div class="player">
+    <video id="video" controls autoplay></video>
+  </div>
+  <div id="channels" class="channels">
+    جاري تحميل القنوات...
+  </div>
 </div>
 
 <script>
+const video = document.getElementById('video');
 
-const video = document.getElementById('video')
-
+// دالة لتشغيل البث
 function play(url){
-
-if(Hls.isSupported()){
-
-const hls = new Hls()
-
-hls.loadSource(url)
-
-hls.attachMedia(video)
-
+  if(Hls.isSupported() && url.endsWith(".m3u8")){
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      video.play();
+    });
+  } else {
+    // Direct MP4, RTMP, أو أي رابط آخر
+    video.src = url;
+    video.play();
+  }
 }
 
-else{
+// تحميل القنوات من M3U
+async function loadChannels(){
+  const sources = [
+    "https://iptv-org.github.io/iptv/index.m3u",
+    "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+    "https://raw.githubusercontent.com/iptv-restream/iptv-channels/master/channels.m3u"
+  ];
 
-video.src = url
+  const container = document.getElementById('channels');
+  container.innerHTML = "";
 
+  for(const src of sources){
+    try{
+      const res = await fetch(src);
+      const text = await res.text();
+      const lines = text.split("\n");
+      for(let i=0;i<lines.length;i++){
+        if(lines[i].startsWith("#EXTINF")){
+          const name = lines[i].split(",")[1];
+          const url = lines[i+1];
+          const div = document.createElement("div");
+          div.className = "channel";
+          div.innerText = name;
+          div.onclick = () => play(url);
+          container.appendChild(div);
+        }
+      }
+    } catch(e){
+      console.log("تعذر تحميل المصدر:", src);
+    }
+  }
 }
 
-}
-
-fetch("https://iptv-org.github.io/iptv/index.m3u")
-
-.then(r=>r.text())
-
-.then(data=>{
-
-let lines = data.split("\n")
-
-let html=""
-
-for(let i=0;i<lines.length;i++){
-
-if(lines[i].startsWith("#EXTINF")){
-
-let name = lines[i].split(",")[1]
-
-let url = lines[i+1]
-
-html += `<div class="channel" onclick="play('${url}')">${name}</div>`
-
-}
-
-}
-
-document.getElementById("channels").innerHTML = html
-
-})
-
+loadChannels();
 </script>
 
 </body>
