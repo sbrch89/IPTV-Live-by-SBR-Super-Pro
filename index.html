@@ -3,21 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>IPTV Live by SBR</title>
+<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<style>
-body{margin:0;font-family:Arial;background:#111;color:white;}
-.container{display:flex;height:90vh;}
-.player{flex:2;display:flex;justify-content:center;align-items:center;}
-video{width:90%;max-height:80vh;background:black;}
-.channels{flex:1;overflow-y:auto;background:#1c1c1c;padding:10px;}
-.channel{padding:8px;border-bottom:1px solid #333;cursor:pointer;}
-.channel:hover{background:#333;}
-h2{text-align:center;margin:10px;}
-</style>
 </head>
 <body>
 
 <h2>IPTV Live by SBR</h2>
+
+<input type="text" id="search-input" placeholder="ابحث عن قناة..." />
 
 <div class="container">
   <div class="player">
@@ -27,70 +20,8 @@ h2{text-align:center;margin:10px;}
     جاري تحميل القنوات...
   </div>
 </div>
-<div class="container">
-  <div class="player">
-    <video id="video" controls autoplay></video>
-  </div>
 
-  <div class="channels">
-    <input type="text" id="search-input" placeholder="ابحث عن قناة...">
-    <div id="channel-list"></div>
-  </div>
-</div>
-<script>
-const video = document.getElementById('video');
-
-// دالة لتشغيل البث
-function play(url){
-  if(Hls.isSupported() && url.endsWith(".m3u8")){
-    const hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-      video.play();
-    });
-  } else {
-    // Direct MP4, RTMP, أو أي رابط آخر
-    video.src = url;
-    video.play();
-  }
-}
-
-// تحميل القنوات من M3U
-async function loadChannels(){
-  const sources = [
-    "https://iptv-org.github.io/iptv/index.m3u",
-    "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
-    "https://raw.githubusercontent.com/iptv-restream/iptv-channels/master/channels.m3u"
-  ];
-
-  const container = document.getElementById('channels');
-  container.innerHTML = "";
-
-  for(const src of sources){
-    try{
-      const res = await fetch(src);
-      const text = await res.text();
-      const lines = text.split("\n");
-      for(let i=0;i<lines.length;i++){
-        if(lines[i].startsWith("#EXTINF")){
-          const name = lines[i].split(",")[1];
-          const url = lines[i+1];
-          const div = document.createElement("div");
-          div.className = "channel";
-          div.innerText = name;
-          div.onclick = () => play(url);
-          container.appendChild(div);
-        }
-      }
-    } catch(e){
-      console.log("تعذر تحميل المصدر:", src);
-    }
-  }
-}
-
-loadChannels();
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
