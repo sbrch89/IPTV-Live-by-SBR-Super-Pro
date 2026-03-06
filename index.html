@@ -1,44 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>IPTV Live by SBR</title>
-
+<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-<style>
-body{
-background:#0b0b0b;
-color:white;
-font-family:Arial;
-text-align:center;
-}
-
-#player{
-width:80%;
-max-width:900px;
-margin:20px auto;
-}
-
-#channels{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-gap:10px;
-padding:20px;
-}
-
-.channel{
-background:#1c1c1c;
-padding:10px;
-cursor:pointer;
-border-radius:8px;
-}
-
-.channel:hover{
-background:#333;
-}
-</style>
-
 </head>
 <body>
 
@@ -48,70 +14,6 @@ background:#333;
 
 <div id="channels"></div>
 
-<script>
-
-const m3uUrl = "https://iptv-org.github.io/iptv/index.m3u";
-
-fetch(m3uUrl)
-.then(res => res.text())
-.then(data => {
-
-let lines = data.split("\n");
-
-let channels = [];
-
-for(let i=0;i<lines.length;i++){
-
-if(lines[i].startsWith("#EXTINF")){
-let name = lines[i].split(",")[1];
-let url = lines[i+1];
-
-channels.push({name,url});
-}
-
-}
-
-showChannels(channels);
-
-});
-
-function showChannels(channels){
-
-let container = document.getElementById("channels");
-
-channels.forEach(ch => {
-
-let div = document.createElement("div");
-div.className="channel";
-div.innerText = ch.name;
-
-div.onclick=()=>play(ch.url);
-
-container.appendChild(div);
-
-});
-
-}
-
-function play(url){
-
-let video = document.getElementById("player");
-
-if(Hls.isSupported()){
-
-let hls = new Hls();
-hls.loadSource(url);
-hls.attachMedia(video);
-
-}else{
-
-video.src = url;
-
-}
-
-}
-
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
