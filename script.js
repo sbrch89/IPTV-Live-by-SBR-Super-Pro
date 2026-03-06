@@ -1,56 +1,104 @@
+// ----------------------------
+// عناصر الصفحة
+// ----------------------------
 const channelList = document.getElementById("channel-list");
 const videoPlayer = document.getElementById("video-player");
 const searchInput = document.getElementById("search-input");
-const darkModeBtn = document.getElementById("dark-mode-toggle");
+const sectionButtons = document.querySelectorAll(".section-btn");
+const languageSelect = document.getElementById("language-select");
 
+// ----------------------------
+// القناة الحالية واللغة
+// ----------------------------
 let allChannels = [];
+let currentLanguage = "ar";
 
-function playChannel(ch) {
-    videoPlayer.src = ch.url;
+// ----------------------------
+// تشغيل القناة
+// ----------------------------
+function playChannel(url) {
+    videoPlayer.src = url;
     videoPlayer.play();
-    document.getElementById("channel-description").textContent = ch.description || "";
 }
 
-// Load channels from M3U source
+// ----------------------------
+// تحميل القنوات من JSON
+// ----------------------------
 async function loadChannels() {
-    const response = await fetch("https://iptv-org.github.io/iptv/index.m3u");
-    const text = await response.text();
-    const lines = text.split("\n");
-    let name = "";
-    allChannels = [];
+    try {
+        const response = await fetch("channels.json");
+        const data = await response.json();
+        allChannels = data; // يحتوي على الأقسام الخمسة
 
-    lines.forEach(line => {
-        if (line.startsWith("#EXTINF")) {
-            name = line.split(",")[1] || "";
-        }
-        if (line.startsWith("http")) {
-            allChannels.push({
-                name: name,
-                url: line,
-                description: `${name} is a live TV channel. Watch free online.`
+        // عرض القسم الأول (رياضة) عند البداية
+        displayChannels("sports");
+
+        // إضافة أحداث البحث
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.toLowerCase();
+            const filtered = [];
+            Object.keys(allChannels).forEach(section => {
+                allChannels[section].forEach(ch => {
+                    const name = ch.name.toLowerCase();
+                    if (name.includes(query)) filtered.push(ch);
+                });
             });
-        }
-    });
+            displayFilteredChannels(filtered);
+        });
 
-    displayChannels(allChannels);
+        // إضافة أحداث أزرار الأقسام
+        sectionButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const section = btn.dataset.section;
+                displayChannels(section);
+            });
+        });
+
+    } catch (err) {
+        console.error("Error loading channels:", err);
+    }
 }
 
-function displayChannels(list) {
+// ----------------------------
+// عرض القنوات حسب القسم
+// ----------------------------
+function displayChannels(section) {
+    const list = allChannels[section] || [];
+    displayFilteredChannels(list);
+}
+
+// ----------------------------
+// عرض قائمة القنوات
+// ----------------------------
+function displayFilteredChannels(list) {
     channelList.innerHTML = "";
     list.forEach(ch => {
         const li = document.createElement("li");
-        li.textContent = ch.name;
-        li.onclick = () => playChannel(ch);
+        li.textContent = ch.description[currentLanguage] || ch.name;
+        li.onclick = () => playChannel(ch.url);
         channelList.appendChild(li);
     });
 }
 
-searchInput.addEventListener("input", () => {
-    const q = searchInput.value.toLowerCase();
-    const filtered = allChannels.filter(c => c.name.toLowerCase().includes(q));
-    displayChannels(filtered);
+// ----------------------------
+// تغيير اللغة
+// ----------------------------
+languageSelect.addEventListener("change", () => {
+    currentLanguage = languageSelect.value;
+    // إعادة عرض القسم الحالي
+    const activeSectionBtn = document.querySelector(".section-btn.active") || sectionButtons[0];
+    displayChannels(activeSectionBtn.dataset.section);
 });
 
-darkModeBtn.onclick = () => document.body.classList.toggle("dark-mode");
+// ----------------------------
+// Dark Mode
+// ----------------------------
+const darkModeBtn = document.getElementById("dark-mode-toggle");
+if (darkModeBtn) {
+    darkModeBtn.onclick = () => document.body.classList.toggle("dark-mode");
+}
 
+// ----------------------------
+// تحميل القنوات عند فتح الموقع
+// ----------------------------
 loadChannels();
