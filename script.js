@@ -7,10 +7,7 @@ const searchInput = document.getElementById("search-input");
 const sectionButtons = document.querySelectorAll(".section-btn");
 const languageSelect = document.getElementById("language-select");
 
-// ----------------------------
-// القناة الحالية واللغة
-// ----------------------------
-let allChannels = [];
+let allChannels = {}; // يحتوي على الأقسام
 let currentLanguage = "ar";
 
 // ----------------------------
@@ -22,40 +19,74 @@ function playChannel(url) {
 }
 
 // ----------------------------
-// تحميل القنوات من JSON
+// تحميل القنوات من iptv-org وتصنيفها
 // ----------------------------
-async function loadChannels() {
+async function loadChannelsFromIPTV() {
     try {
-        const response = await fetch("channels.json");
-        const data = await response.json();
-        allChannels = data; // يحتوي على الأقسام الخمسة
+        const response = await fetch("https://iptv-org.github.io/iptv/index.m3u");
+        const text = await response.text();
+        const lines = text.split("\n");
 
-        // عرض القسم الأول (رياضة) عند البداية
-        displayChannels("sports");
+        allChannels = {
+            sports: [],
+            movies: [],
+            news: [],
+            kids: [],
+            countries: []
+        };
 
-        // إضافة أحداث البحث
+        let channelName = "";
+
+        lines.forEach(line => {
+            if (line.startsWith("#EXTINF")) {
+                channelName = line.split(",")[1] || "Unknown";
+            }
+            if (line.startsWith("http")) {
+                const lowerName = channelName.toLowerCase();
+                let section = "countries"; // افتراضي
+
+                if (lowerName.includes("sport") || lowerName.includes("beIN") || lowerName.includes("espn")) section = "sports";
+                else if (lowerName.includes("movie") || lowerName.includes("hbo") || lowerName.includes("cinema") || lowerName.includes("cinemax")) section = "movies";
+                else if (lowerName.includes("news") || lowerName.includes("cnn") || lowerName.includes("bbc")) section = "news";
+                else if (lowerName.includes("cartoon") || lowerName.includes("disney") || lowerName.includes("nick")) section = "kids";
+
+                allChannels[section].push({
+                    name: channelName,
+                    url: line,
+                    description: {
+                        ar: channelName,
+                        en: channelName,
+                        fr: channelName
+                    }
+                });
+            }
+        });
+
+        displayChannels("sports"); // القسم الافتراضي عند التحميل
+
+        // البحث
         searchInput.addEventListener("input", () => {
             const query = searchInput.value.toLowerCase();
             const filtered = [];
-            Object.keys(allChannels).forEach(section => {
-                allChannels[section].forEach(ch => {
-                    const name = ch.name.toLowerCase();
-                    if (name.includes(query)) filtered.push(ch);
+            Object.keys(allChannels).forEach(sec => {
+                allChannels[sec].forEach(ch => {
+                    if (ch.name.toLowerCase().includes(query)) filtered.push(ch);
                 });
             });
             displayFilteredChannels(filtered);
         });
 
-        // إضافة أحداث أزرار الأقسام
+        // أزرار الأقسام
         sectionButtons.forEach(btn => {
             btn.addEventListener("click", () => {
-                const section = btn.dataset.section;
-                displayChannels(section);
+                sectionButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                displayChannels(btn.dataset.section);
             });
         });
 
     } catch (err) {
-        console.error("Error loading channels:", err);
+        console.error("Error loading IPTV channels:", err);
     }
 }
 
@@ -85,7 +116,6 @@ function displayFilteredChannels(list) {
 // ----------------------------
 languageSelect.addEventListener("change", () => {
     currentLanguage = languageSelect.value;
-    // إعادة عرض القسم الحالي
     const activeSectionBtn = document.querySelector(".section-btn.active") || sectionButtons[0];
     displayChannels(activeSectionBtn.dataset.section);
 });
@@ -99,6 +129,6 @@ if (darkModeBtn) {
 }
 
 // ----------------------------
-// تحميل القنوات عند فتح الموقع
+// بدء التحميل عند فتح الموقع
 // ----------------------------
-loadChannels();
+loadChannelsFromIPTV();
