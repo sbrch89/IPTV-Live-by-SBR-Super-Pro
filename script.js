@@ -2,117 +2,127 @@
 const channelList = document.getElementById("channel-list");
 const videoPlayer = document.getElementById("video-player");
 const searchInput = document.getElementById("search-input");
-const sectionButtons = document.querySelectorAll(".section-btn");
-const darkModeBtn = document.getElementById("dark-mode-toggle");
 
-// جميع القنوات (ستُملأ من JSON)
 let allChannels = [];
-let currentLanguage = "ar"; // اللغة الافتراضية
 
-// إعداد اللغات
-const languages = {
-  ar: { sections: { sports: "رياضة", movies: "أفلام", news: "أخبار", kids: "أطفال", countries: "قنوات دولية" }, search_placeholder: "ابحث عن قناة...", download_m3u: "تحميل ملف M3U" },
-  en: { sections: { sports: "Sports", movies: "Movies", news: "News", kids: "Kids", countries: "Countries" }, search_placeholder: "Search channel...", download_m3u: "Download M3U" },
-  fr: { sections: { sports: "Sports", movies: "Films", news: "Actualités", kids: "Enfants", countries: "Pays" }, search_placeholder: "Rechercher une chaîne...", download_m3u: "Télécharger M3U" }
-};
-
-// ----------------------------
 // تشغيل القناة
-// ----------------------------
 function playChannel(url) {
     videoPlayer.src = url;
     videoPlayer.play();
 }
 
-// ----------------------------
-// عرض القنوات حسب القسم
-// ----------------------------
-function displayChannels(sectionOrList) {
+// تحميل القنوات من ملف M3U
+async function loadChannels() {
+
+    const response = await fetch("https://iptv-org.github.io/iptv/index.m3u");
+    const text = await response.text();
+
+    const lines = text.split("\n");
+
+    let name = "";
+    let group = "";
+
+    allChannels = [];
+
+    lines.forEach(line => {
+
+        if (line.startsWith("#EXTINF")) {
+
+            const nameMatch = line.split(",");
+
+            name = nameMatch[nameMatch.length - 1];
+
+            const groupMatch = line.match(/group-title="(.*?)"/);
+
+            group = groupMatch ? groupMatch[1] : "other";
+
+        }
+
+        if (line.startsWith("http")) {
+
+            allChannels.push({
+                name: name,
+                group: group,
+                url: line
+            });
+
+        }
+
+    });
+
+    displayChannels(allChannels);
+
+}
+
+loadChannels();
+
+
+// عرض القنوات
+function displayChannels(list) {
+
     channelList.innerHTML = "";
 
-    let channelsToShow = [];
-    if (Array.isArray(sectionOrList)) {
-        channelsToShow = sectionOrList; // قائمة جاهزة
-    } else {
-        channelsToShow = allChannels[sectionOrList] || [];
-    }
+    list.forEach(ch => {
 
-    channelsToShow.forEach(ch => {
         const li = document.createElement("li");
-        li.textContent = ch.description?.[currentLanguage] || ch.name;
+
+        li.textContent = ch.name;
+
         li.onclick = () => playChannel(ch.url);
+
         channelList.appendChild(li);
+
     });
+
 }
 
-// ----------------------------
-// تحميل القنوات من ملف JSON
-// ----------------------------
-async function loadChannelsFromJSON() {
-    try {
-        const response = await fetch("channels/channels.json");
-        allChannels = await response.json();
-        displayChannels("sports"); // عرض القسم الأول افتراضيًا
-    } catch (err) {
-        console.error("Failed to load channels.json:", err);
-    }
-}
-loadChannelsFromJSON();
 
-// ----------------------------
-// البحث عن القنوات
-// ----------------------------
+// البحث
 searchInput.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase();
-    const filtered = [];
 
-    Object.keys(allChannels).forEach(section => {
-        allChannels[section].forEach(ch => {
-            const name = ch.description?.[currentLanguage] || ch.name;
-            if (name.toLowerCase().includes(query)) {
-                filtered.push(ch);
-            }
-        });
-    });
+    const query = searchInput.value.toLowerCase();
+
+    const filtered = allChannels.filter(ch =>
+        ch.name.toLowerCase().includes(query)
+    );
 
     displayChannels(filtered);
+
 });
 
-// ----------------------------
-// تغيير الأقسام عند الضغط على الزر
-// ----------------------------
-sectionButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-        const section = btn.dataset.section;
-        displayChannels(section);
-    });
-});
 
-// ----------------------------
 // Dark Mode
-// ----------------------------
-if (darkModeBtn) {
-    darkModeBtn.onclick = () => {
+const darkBtn = document.getElementById("dark-mode-toggle");
+
+if (darkBtn) {
+
+    darkBtn.onclick = () => {
         document.body.classList.toggle("dark-mode");
     };
+
 }
 
-// ----------------------------
+
 // تغيير اللغة
-// ----------------------------
+const languages = {
+
+    ar: {
+        search: "ابحث عن قناة..."
+    },
+
+    en: {
+        search: "Search channel..."
+    },
+
+    fr: {
+        search: "Rechercher une chaîne..."
+    }
+
+};
+
 function setLanguage(lang) {
-    if (!languages[lang]) return;
-    currentLanguage = lang;
 
-    // تحديث placeholder البحث
-    searchInput.placeholder = languages[lang].search_placeholder;
+    searchInput.placeholder = languages[lang].search;
 
-    // تحديث أسماء الأقسام
-    sectionButtons.forEach(btn => {
-        const sec = btn.dataset.section;
-        btn.textContent = languages[lang].sections[sec] || sec;
-    });
-
-    // إعادة عرض القسم الحالي أو القسم الأول
-    displayChannels("sports");
 }
+
