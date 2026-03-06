@@ -27,7 +27,16 @@ h2{text-align:center;margin:10px;}
     جاري تحميل القنوات...
   </div>
 </div>
+<div class="container">
+  <div class="player">
+    <video id="video" controls autoplay></video>
+  </div>
 
+  <div class="channels">
+    <input type="text" id="search-input" placeholder="ابحث عن قناة...">
+    <div id="channel-list"></div>
+  </div>
+</div>
 <script>
 const video = document.getElementById('video');
 
@@ -85,3 +94,4 @@ loadChannels();
 
 </body>
 </html>
+
