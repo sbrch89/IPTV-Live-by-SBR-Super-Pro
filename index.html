@@ -1,30 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPTV Live by SBR</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Live</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <h1>IPTV Live by SBR</h1>
-  <input id="search-input" placeholder="Search channels...">
-  <button id="dark-mode-toggle">🌙</button>
-</header>
+    <header>
+        <h1>IPTV Live</h1>
+        <div class="controls">
+            <button id="dark-mode-toggle">🌙 Dark Mode</button>
+            <select id="language-select">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+    </header>
 
-<div id="main-content">
-  <div id="video-container">
-    <video id="video-player" controls autoplay></video>
-    <div id="channel-description"></div>
-  </div>
+    <main>
+        <div class="video-container">
+            <video id="video-player" controls autoplay></video>
+        </div>
 
-  <aside id="channel-list-container">
-    <ul id="channel-list"></ul>
-  </aside>
-</div>
+        <aside class="channel-sidebar">
+            <input type="text" id="search-input" placeholder="ابحث عن قناة...">
+            <div class="section-buttons">
+                <button class="section-btn" data-section="sports">رياضة</button>
+                <button class="section-btn" data-section="movies">أفلام</button>
+                <button class="section-btn" data-section="news">أخبار</button>
+                <button class="section-btn" data-section="kids">أطفال</button>
+                <button class="section-btn" data-section="countries">دولية</button>
+            </div>
+            <ul id="channel-list"></ul>
+        </aside>
+    </main>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
