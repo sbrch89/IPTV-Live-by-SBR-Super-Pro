@@ -1,11 +1,40 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>IPTV Live by SBR</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<style>
+body{
+background:#111;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+video{
+width:80%;
+margin:20px auto;
+display:block;
+}
+
+button{
+display:block;
+width:80%;
+margin:5px auto;
+padding:10px;
+background:#222;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+button:hover{
+background:#444;
+}
+</style>
 </head>
+
 <body>
 
 <h1>IPTV Live by SBR</h1>
@@ -14,6 +43,65 @@
 
 <div id="channels"></div>
 
-<script src="script.js"></script>
+<script>
+
+const sources = [
+
+"https://iptv-org.github.io/iptv/index.m3u",
+
+"https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+
+"https://raw.githubusercontent.com/iptv-restream/iptv-channels/master/channels.m3u"
+
+];
+
+async function loadChannels(){
+
+let container=document.getElementById("channels");
+
+for(let url of sources){
+
+try{
+
+let res=await fetch(url);
+let text=await res.text();
+
+let lines=text.split("\n");
+
+for(let i=0;i<lines.length;i++){
+
+if(lines[i].startsWith("#EXTINF")){
+
+let name=lines[i].split(",")[1];
+let stream=lines[i+1];
+
+let btn=document.createElement("button");
+
+btn.innerText=name;
+
+btn.onclick=function(){
+document.getElementById("player").src=stream;
+};
+
+container.appendChild(btn);
+
+}
+
+}
+
+}catch(e){
+
+console.log("source failed",url);
+
+}
+
+}
+
+}
+
+loadChannels();
+
+</script>
+
 </body>
 </html>
