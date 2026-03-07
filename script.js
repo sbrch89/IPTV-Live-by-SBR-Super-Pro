@@ -56,11 +56,19 @@ searchInput.addEventListener("input", e=>{
 
 // المصادر الرئيسية
 const sources = [
-  "https://iptv-org.github.io/iptv/index.m3u",
+
+"https://iptv-org.github.io/iptv/countries/tn.m3u",
+
+"https://iptv-org.github.io/iptv/languages/ara.m3u",
+
+"https://iptv-org.github.io/iptv/countries/fr.m3u",
+
+"https://iptv-org.github.io/iptv/categories/sports.m3u"
 
 ];
 // تحميل جميع المصادر تلقائيًا
 sources.forEach(src=>loadChannelsFromM3U(src));
+
 
 
 
