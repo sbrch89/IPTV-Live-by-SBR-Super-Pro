@@ -59,9 +59,6 @@ const sources = [
   "https://iptv-org.github.io/iptv/index.m3u",
   "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
   "https://raw.githubusercontent.com/iptv-restream/iptv-channels/master/channels.m3u"
-];
-const sources = [
-
 "https://iptv-org.github.io/iptv/index.m3u",
 
 "https://iptv-org.github.io/iptv/languages/ara.m3u",
@@ -73,6 +70,7 @@ const sources = [
 ];
 // تحميل جميع المصادر تلقائيًا
 sources.forEach(src=>loadChannelsFromM3U(src));
+
 
 
 
