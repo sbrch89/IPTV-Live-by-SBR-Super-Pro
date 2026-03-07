@@ -34,7 +34,17 @@ async function loadChannelsFromM3U(url){
     console.log("تعذر تحميل القنوات من:", url);
   }
 }
+const sources = [
 
+"https://iptv-org.github.io/iptv/index.m3u",
+
+"https://iptv-org.github.io/iptv/languages/ara.m3u",
+
+"https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+
+"https://raw.githubusercontent.com/iptv-restream/iptv-channels/master/channels.m3u"
+
+];
 // عرض القنوات
 function displayChannels(list){
   channelsContainer.innerHTML = "";
@@ -63,4 +73,5 @@ const sources = [
 
 // تحميل جميع المصادر تلقائيًا
 sources.forEach(src=>loadChannelsFromM3U(src));
+
 
